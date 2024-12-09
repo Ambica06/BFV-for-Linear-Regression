@@ -2,7 +2,10 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
-from BFV import *  # Import the BFV module from BFV_demo.py
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+import numpy as np
+from BFV import *  # Import the BFV module
 
 # Load the dataset
 file = 'kc_house_data.csv'
@@ -29,8 +32,8 @@ y = (y * scaling_factor).astype(int)  # Scale target variable to integers
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=41)
 
 # Use only the first 10 values of X_test
-X_test = X_test.head(20)  # Select the first 10 rows for testing
-y_test = y_test.head(20)   # Corresponding target values
+X_test = X_test.head(15)  # Select the first 10 rows for testing
+y_test = y_test.head(15)   # Corresponding target values
 
 # Standardize the features (optional, but may not be necessary for integer data)
 scaler = StandardScaler()
@@ -149,3 +152,24 @@ y_pred = model.predict(X_test_scaled)
 # Print the results
 print("\nDecrypted Predictions for the test instances (Encrypted Data):", decrypted_predictions_scaled)
 print("\nPrediction from Unencrypted Model:", y_pred)  # Print predictions for all 10 test instances
+print("\nThe actual values: ", y_test)
+
+# Calculate metrics
+mae = mean_absolute_error(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+# Print results
+print("\nAccuracy Score for Unencrypted Data:")
+print(f"Mean Absolute Error (MAE): {mae:.2f}")
+print(f"Mean Squared Error (MSE): {mse:.2f}")
+print(f"R-squared (R²): {r2:.4f}")
+
+mae = mean_absolute_error(y_test, decrypted_predictions_scaled)
+mse = mean_squared_error(y_test, decrypted_predictions_scaled)
+r2 = r2_score(y_test, decrypted_predictions_scaled)
+
+print("\nAccuracy Score for Encrypted Data:")
+print(f"Mean Absolute Error (MAE): {mae:.2f}")
+print(f"Mean Squared Error (MSE): {mse:.2f}")
+print(f"R-squared (R²): {r2:.4f}")

@@ -104,35 +104,6 @@ class BFV:
 
         self.rlk1 = rlk1
     #
-    def EvalKeyGenV2(self, p):
-        """
-        a <- R_p*q
-        e <- X'
-        rlk[0] = [-(a*sk+e)+p*s^2]_p*q
-        rlk[1] =  a
-        """
-        self.p = p
-
-        rlk2 = []
-
-        a, e = Poly(self.n,self.p*self.q), Poly(self.n,self.p*self.q)
-        a.randomize(self.p*self.q)
-        e.randomize(0, domain=False, type=1, mu=self.mu, sigma=self.sigma)
-
-        c0 = RefPolMulv2(a.F,self.sk.F)
-        c0 = [c0_+e_ for c0_,e_ in zip(c0,e.F)]
-        c1 = RefPolMulv2(self.sk.F,self.sk.F)
-        c1 = [self.p*c1_ for c1_ in c1]
-        c2 = [(c1_-c0_)%(self.p*self.q) for c0_,c1_ in zip(c0,c1)]
-
-        c = Poly(self.n,self.p*self.q)
-        c.F = c2
-
-        rlk2.append(c)
-        rlk2.append(a)
-
-        self.rlk2 = rlk2
-    #
     def Encryption(self, m):
         """
         delta = floor(q/t)
@@ -176,24 +147,6 @@ class BFV:
         mr.inNTT = m.inNTT
         return mr
     #
-    def DecryptionV2(self, ct):
-        """
-        ct <- c2*s^2 + c1*s + c0
-        ct <- floot(ct*(t/q))
-        m <- [ct]_t
-        """
-        sk2 = (self.sk * self.sk)
-        m = ct[0]
-        m = (m + (ct[1]*self.sk))
-        m = (m + (ct[2]*sk2))
-        m.F = [((self.t * x) / self.q) for x in m.F]
-        m = round(m)
-        m = m % self.t
-        mr = Poly(self.n,self.t,self.qnp)
-        mr.F = m.F
-        mr.inNTT = m.inNTT
-        return mr
-    #
     def RelinearizationV1(self,ct):
         c0 = ct[0]
         c1 = ct[1]
@@ -228,27 +181,6 @@ class BFV:
 
         return [c0r,c1r]
     #
-    def RelinearizationV2(self,ct):
-        c0 = ct[0]
-        c1 = ct[1]
-        c2 = ct[2]
-
-        c2_0 = RefPolMulv2(c2.F,self.rlk2[0].F)
-        c2_0 = [round(c/self.p) for c in c2_0]
-        c2_0 = [(c % self.q) for c in c2_0]
-
-        c2_1 = RefPolMulv2(c2.F,self.rlk2[1].F)
-        c2_1 = [round(c/self.p) for c in c2_1]
-        c2_1 = [(c % self.q) for c in c2_1]
-
-        c0e = Poly(self.n,self.q,self.qnp); c0e.F = c2_0
-        c1e = Poly(self.n,self.q,self.qnp); c1e.F = c2_1
-
-        c0r = c0e + c0
-        c1r = c1e + c1
-
-        return [c0r,c1r]
-    #
     def IntEncode(self,m): # integer encode
         mr = Poly(self.n,self.t)
         if m >0:
@@ -279,11 +211,6 @@ class BFV:
     def HomomorphicAddition(self, ct0, ct1):
         ct0_b = ct0[0] + ct1[0]
         ct1_b = ct0[1] + ct1[1]
-        return [ct0_b,ct1_b]
-    #
-    def HomomorphicSubtraction(self, ct0, ct1):
-        ct0_b = ct0[0] - ct1[0]
-        ct1_b = ct0[1] - ct1[1]
         return [ct0_b,ct1_b]
     #
     def HomomorphicMultiplication(self, ct0, ct1):
