@@ -17,7 +17,7 @@ df.drop(columns=['id', 'date'], inplace=True)  # Drop 'id' and 'date' columns
 df.dropna(inplace=True)  # Drop rows with missing values
 
 # Define features and target variable
-X = df[['sqft_living', 'bedrooms']]  # Select a few features for testing
+X = df[['sqft_living', 'bedrooms', 'bathrooms', 'sqft_lot', 'floors', 'waterfront']]  # Select a few features for testing
 y = df['price']  # Target variable
 
 # Scale the features and target variable to integers
@@ -29,8 +29,8 @@ y = (y * scaling_factor).astype(int)  # Scale target variable to integers
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=41)
 
 # Use only the first 10 values of X_test
-X_test = X_test.head(10)  # Select the first 10 rows for testing
-y_test = y_test.head(10)   # Corresponding target values
+X_test = X_test.head(20)  # Select the first 10 rows for testing
+y_test = y_test.head(20)   # Corresponding target values
 
 # Standardize the features (optional, but may not be necessary for integer data)
 scaler = StandardScaler()
